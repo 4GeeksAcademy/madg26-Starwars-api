@@ -15,6 +15,15 @@ class User(db.Model):
     like_planet: Mapped[list['FavoritesPlanets']] = relationship(back_populates = 'users')
     like_character: Mapped[list['FavoritesCharacter']] = relationship(back_populates = 'users')
     like_starships: Mapped[list['FavoritesStarships']] = relationship(back_populates = 'users')
+
+    def serialize(self):
+        return {
+            "firstname" : self.firstname,
+            "lastname": self.lastname,
+            "username": self.username,
+            "email": self.email,
+            "id": self.id
+        }
     
 
 class Planet(db.Model):
@@ -24,6 +33,13 @@ class Planet(db.Model):
     climate: Mapped[str] = mapped_column(String(50))
     favorites_by: Mapped[list['FavoritesPlanets']] = relationship(back_populates = 'planets')
 
+    def serialize(self): 
+        return{
+            "name" : self.name,
+            "climate" : self.climate,
+            "id": self.id
+        }
+
 class Character(db.Model):
     __tablename__ = 'character'
     id: Mapped[int] = mapped_column(primary_key= True)
@@ -32,12 +48,26 @@ class Character(db.Model):
     height: Mapped[int] = mapped_column(Integer)
     favorites_by: Mapped[list['FavoritesCharacter']]= relationship(back_populates = 'characters')
 
+    def serialize(self):
+        return {
+            "name": self.name,
+            "gender" : self.gender,
+            "height" : self.height,
+            "id" : self.id
+        }
+
 class Starship(db.Model):
     __tablename__ = 'starships'
     id: Mapped[int] = mapped_column(primary_key = True)
     name: Mapped[str] = mapped_column(String(50), nullable = False)
     model: Mapped[str] = mapped_column(String(50))
     favorites_by: Mapped[list['FavoritesStarships']]= relationship(back_populates = 'starships')
+    def serialize(self):
+        return {
+            "name" : self.name,
+            "model" : self.name,
+            "id" : self.id
+        }
 
 class FavoritesPlanets(db.Model):
     __tablename__ = 'favorites_planets'
