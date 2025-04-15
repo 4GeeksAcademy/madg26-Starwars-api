@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User,Character, Planet, Starship
+from models import db, User,Character, Planet, Starship, FavoritesCharacter, FavoritesStarships
 #from models import Person
 
 
@@ -286,6 +286,20 @@ def edit_starship(id):
           starship.model= data['model']
      db.session.commit()
      return ({'msg' : 'Vehiculo actualizado correctamente', 'sttarship' : starship.serialize()})
+
+# ----- METODOS PARA LOS FAVORITOS ----- #
+
+@app.route('/users/favorites/<int:user_id>', methods = ['GET'])
+def favorites_character(user_id):
+     user = User.query.get(user_id)
+     if user :
+          characters_favorites = user.serialize()['like_character']
+          starships_favorites = user.serialize()['like_starships']
+         
+          return jsonify({'characters_favorites' : characters_favorites, 'starship_favorites' : starships_favorites})
+     else: 
+          return jsonify({'msg': 'Usuario no encontrado'}), 400
+     
 
 
 

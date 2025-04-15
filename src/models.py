@@ -22,8 +22,12 @@ class User(db.Model):
             "lastname": self.lastname,
             "username": self.username,
             "email": self.email,
-            "id": self.id
+            "id": self.id,
+            "like_character" : list(map(lambda like_character: like_character.serialize()['character_name'], self.like_character)),
+            "like_starships": list(map(lambda like_starships: like_starships.serialize()['starship_name'], self.like_starships))
         }
+    def __repr__(self):
+        return f'{self.username}'
     
 
 class Planet(db.Model):
@@ -46,7 +50,7 @@ class Character(db.Model):
     name: Mapped[str] = mapped_column(String(120), nullable= False)
     gender: Mapped[str]= mapped_column(String(50))
     height: Mapped[int] = mapped_column(Integer)
-    favorites_by: Mapped[list['FavoritesCharacter']]= relationship(back_populates = 'characters')
+    favorites_by: Mapped[list['FavoritesCharacter']]= relationship(back_populates = 'character')
 
     def serialize(self):
         return {
@@ -55,6 +59,8 @@ class Character(db.Model):
             "height" : self.height,
             "id" : self.id
         }
+    def __repr__(self):
+        return f'{self.name}'
 
 class Starship(db.Model):
     __tablename__ = 'starships'
@@ -65,9 +71,11 @@ class Starship(db.Model):
     def serialize(self):
         return {
             "name" : self.name,
-            "model" : self.name,
+            "model" : self.model,
             "id" : self.id
         }
+    def __repr__(self):
+        return f'{self.name}'
 
 class FavoritesPlanets(db.Model):
     __tablename__ = 'favorites_planets'
@@ -83,7 +91,15 @@ class FavoritesCharacter(db.Model):
     user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
     users: Mapped['User'] = relationship(back_populates = 'like_character')
     character_id: Mapped[int] = mapped_column(ForeignKey('character.id'))
-    characters: Mapped['Character'] = relationship(back_populates = 'favorites_by') 
+    character: Mapped['Character'] = relationship(back_populates = 'favorites_by') 
+    def __repr__(self):
+        return f'{self.character.name}'
+    def serialize(self):
+        return {
+            'user_name' : self.users.firstname,
+            'character_name' : self.character.name
+        }
+   
 
 class FavoritesStarships(db.Model):
     __tablename__ = 'FavoritesStarships'
@@ -92,14 +108,12 @@ class FavoritesStarships(db.Model):
     users: Mapped['User'] = relationship(back_populates = 'like_starships')
     starships_id: Mapped[int] = mapped_column(ForeignKey('starships.id'))
     starships: Mapped['Starship'] = relationship(back_populates = 'favorites_by') 
-
-
-
-
-
+    def __repr__(self):
+        return f'{self.starships.name}'
     def serialize(self):
         return {
-            "id": self.id,
-            "email": self.email,
-            # do not serialize the password, its a security breach
+            'user_name' : self.users.firstname,
+            'starship_name' : self.starships.name
         }
+
+
