@@ -23,8 +23,9 @@ class User(db.Model):
             "username": self.username,
             "email": self.email,
             "id": self.id,
-            "like_character" : list(map(lambda like_character: like_character.serialize()['character_name'], self.like_character)),
-            "like_starships": list(map(lambda like_starships: like_starships.serialize()['starship_name'], self.like_starships))
+            "like_character" : list(map(lambda like_character: like_character.serialize(), self.like_character)),
+            "like_starships": list(map(lambda like_starships: like_starships.serialize(), self.like_starships)),
+            "like_planet": list(map(lambda like_planet: like_planet.serialize(), self.like_planet))
         }
     def __repr__(self):
         return f'{self.username}'
@@ -43,6 +44,8 @@ class Planet(db.Model):
             "climate" : self.climate,
             "id": self.id
         }
+    def __repr__(self):
+        return f'{self.name}'
 
 class Character(db.Model):
     __tablename__ = 'character'
@@ -84,7 +87,16 @@ class FavoritesPlanets(db.Model):
     users: Mapped['User'] = relationship(back_populates = 'like_planet')
     planet_id: Mapped[int] = mapped_column(ForeignKey('planet.id'))
     planets: Mapped['Planet'] = relationship(back_populates = 'favorites_by')
+    def __repr__(self):
+        return f'{self.planets.name}'
 
+    def serialize(self):
+        return {
+            'planet_name' : self.planets.name,
+            'planet_id' : self.planets.id,
+            'planet_climate' : self.planets.climate
+
+        }
 class FavoritesCharacter(db.Model):
     __tablename__ = 'FavoritesCharacter'
     id: Mapped[int] = mapped_column(primary_key = True)
@@ -96,8 +108,10 @@ class FavoritesCharacter(db.Model):
         return f'{self.character.name}'
     def serialize(self):
         return {
-            'user_name' : self.users.firstname,
-            'character_name' : self.character.name
+            'character_name' : self.character.name,
+            'character_id' : self.character.id,
+            'character_gender' : self.character.gender,
+            'character_height': self.character.height
         }
    
 
@@ -112,8 +126,9 @@ class FavoritesStarships(db.Model):
         return f'{self.starships.name}'
     def serialize(self):
         return {
-            'user_name' : self.users.firstname,
-            'starship_name' : self.starships.name
+            'starship_model' : self.starships.model,
+            'starship_name' : self.starships.name,
+            'starship_id' : self.starships.id
         }
 
 
